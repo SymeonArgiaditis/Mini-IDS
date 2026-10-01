@@ -4,8 +4,6 @@ from scapy.layers.dns import DNS, DNSQR
 
 from collections import defaultdict
 
-### Build ARP table using Hash Map ###
-
 with PcapReader("sample.pcap") as pcap:
     table = defaultdict(set)
     alerts = []
@@ -19,16 +17,16 @@ with PcapReader("sample.pcap") as pcap:
                 continue
 
             # Dictionary of sets ip: set(mac1, mac2)
-            old_mac = table[ip]
+            known_macs = table[ip]
 
-            if old_mac and mac not in old_mac:
+            if known_macs and mac not in known_macs:
                 print(f"[ALERT] Possible ARP spoofing for {ip}!\n"
-                      f"Old MAC: {old_mac}. New MAC: {mac}\n"
+                      f"Old MAC: {known_macs}. New MAC: {mac}\n"
                 )
 
-                alerts.append((ip, set(old_mac), mac))
+                alerts.append((ip, known_macs, mac))
 
-            old_mac.add(mac)
+            known_macs.add(mac)
 
     print(f"ARP Table State: {dict(table)}")
 
