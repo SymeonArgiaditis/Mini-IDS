@@ -66,9 +66,10 @@ with PcapReader("sample.pcap") as pcap:
 
     print(f"ARP Table State: {dict(table)}")
 
-# print("\n--- ARP Spoofing Summary ---")
-# for ip, previous_macs, new_mac in alerts:
-#     print(f"IP: {ip}")
-#     print(f"  Previous MAC(s): {', '.join(previous_macs)}")
-#     print(f"  Conflicting MAC: {new_mac}")
-#     print("-" * 30)
+print("\n--- Summary ---")
+for level, kind, ip, first_seen, last_seen, count in findings.values():
+    print(f"IP: {ip}")
+    print(f"Kind: {kind}")
+    print(f"First seen: {first_seen} | Last seen: {last_seen}")
+    print(f"Appearances: {count}")
+    print("-" * 30)
