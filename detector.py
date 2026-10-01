@@ -5,7 +5,19 @@ from scapy.layers.dns import DNS, DNSQR
 from collections import defaultdict
 from datetime import datetime, timezone
 
-def check_arp(pkt, table, alerts):
+def record(findings, level, kind, ip, ts, **details):
+    key = (kind, ip)
+
+    if key in findings:
+        findings[key]["count"] += 1
+        findings[key]["last_seen"] = ts
+    else:
+        findings[key] = {
+            "level": level, "kind": kind, "ip":ip,
+            "first_seen": ts, "last_seen": ts, "count": 1  
+        }
+
+def check_arp(pkt, table, findings):
     ip = pkt[ARP].psrc
     mac = pkt[ARP].hwsrc
 
@@ -24,6 +36,10 @@ def check_arp(pkt, table, alerts):
             f"[WARN] ARP header mismatch for {ip}\n"
             f"\tEthernet src: {ether_mac} | ARP hwsrc: {mac} | t={time_str}\n"
         )
+        record(
+            findings, "WARN", "header_mismatch", ip, timestamp,
+            ether_mac = ether_mac, arp_mac = mac    
+        )
 
     known_macs = table[ip]
 
@@ -32,24 +48,26 @@ def check_arp(pkt, table, alerts):
             f"[ALERT] Possible ARP spoofing for {ip}!\n"
             f"\tOld MAC: {known_macs} | New MAC: {mac} | t={time_str}\n"
         )
-        # We use set() to store a copy of known_macs, so it doesn't mutate later
-        alerts.append((ip, set(known_macs), mac))
+        record(
+            findings, "ALERT", "arp_spoofing", ip, timestamp,
+            ether_mac = ether_mac, arp_mac = mac
+        )
 
     known_macs.add(mac)
 
 with PcapReader("sample.pcap") as pcap:
     table = defaultdict(set)
-    alerts = []
+    findings = {}
 
     for pkt in pcap:
         if pkt.haslayer(ARP):
-            check_arp(pkt, table, alerts)
+            check_arp(pkt, table, findings)
 
     print(f"ARP Table State: {dict(table)}")
 
-print("\n--- ARP Spoofing Summary ---")
-for ip, previous_macs, new_mac in alerts:
-    print(f"IP: {ip}")
-    print(f"  Previous MAC(s): {', '.join(previous_macs)}")
-    print(f"  Conflicting MAC: {new_mac}")
-    print("-" * 30)
+# print("\n--- ARP Spoofing Summary ---")
+# for ip, previous_macs, new_mac in alerts:
+#     print(f"IP: {ip}")
+#     print(f"  Previous MAC(s): {', '.join(previous_macs)}")
+#     print(f"  Conflicting MAC: {new_mac}")
+#     print("-" * 30)
