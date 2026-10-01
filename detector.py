@@ -14,7 +14,8 @@ def record(findings, level, kind, ip, ts, **details):
     else:
         findings[key] = {
             "level": level, "kind": kind, "ip":ip,
-            "first_seen": ts, "last_seen": ts, "count": 1  
+            "first_seen": ts, "last_seen": ts, "count": 1,
+            **details  
         }
 
 def check_arp(pkt, table, findings):
