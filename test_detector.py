@@ -1,4 +1,3 @@
-from collections import defaultdict
 from scapy.layers.l2 import Ether, ARP
 
 from detector import check_arp
@@ -18,7 +17,7 @@ MISMATCH_KEY = ("header_mismatch", IP)
 
 
 def run(*packets):
-    table = defaultdict(set)
+    table = {}
     findings = {}
 
     for pkt in packets:
