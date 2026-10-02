@@ -5,6 +5,12 @@ from scapy.layers.dns import DNS, DNSQR
 from collections import defaultdict
 from datetime import datetime, timezone
 
+def format_time(timestamp):
+    utc_timestamp = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+    time_str = utc_timestamp.strftime("%H:%M:%S")
+
+    return time_str
+
 def record(findings, level, kind, ip, ts, **details):
     key = (kind, ip)
 
@@ -29,8 +35,7 @@ def check_arp(pkt, table, findings):
     ether_mac = pkt[Ether].src if pkt.haslayer(Ether) else None
 
     timestamp = float(pkt.time)
-    utc_timestamp = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-    time_str = utc_timestamp.strftime("%H:%M:%S")
+    time_str = format_time(timestamp = float(pkt.time))
 
     if ip == "0.0.0.0":
         return
