@@ -69,8 +69,7 @@ def check_arp(pkt, table, findings):
     if not suspect:
         known_macs.add(arp_mac)
 
-
-if __name__ == "__main__":    
+def main():
     with PcapReader("sample.pcap") as pcap:
         table = defaultdict(set)
         findings = {}
@@ -93,3 +92,6 @@ if __name__ == "__main__":
         for e in sorted(item["evidence"]):
             print(f"  {e}")
         print("-" * 30)
+
+if __name__ == "__main__":    
+    main()
