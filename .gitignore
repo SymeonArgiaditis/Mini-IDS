@@ -1,4 +1,8 @@
-.venv
-.vscode
-results.md
-sample.pcap
+.vscode/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.pcap
+*.pcapng
+*.db
