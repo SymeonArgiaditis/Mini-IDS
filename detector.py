@@ -35,7 +35,7 @@ def check_arp(pkt, table, findings):
     ether_mac = pkt[Ether].src if pkt.haslayer(Ether) else None
 
     timestamp = float(pkt.time)
-    time_str = format_time(timestamp = float(pkt.time))
+    time_str = format_time(timestamp)
 
     if ip == "0.0.0.0":
         return
@@ -79,6 +79,7 @@ for item in findings.values():
     print(f"IP: {item['ip']}")
     print(f"Level: {item['level']}")
     print(f"Kind: {item['kind']}")
-    print(f"First seen: {item['first_seen']} | Last seen: {item['last_seen']}")
+    print(f"First seen: {format_time(item['first_seen'])}")
+    print(f"Last seen: {format_time(item['last_seen'])}")
     print(f"Appearances: {item['count']}")
     print("-" * 30)
