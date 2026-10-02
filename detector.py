@@ -35,13 +35,16 @@ def check_arp(pkt, table, findings):
     arp_mac = pkt[ARP].hwsrc
     ether_mac = pkt[Ether].src if pkt.haslayer(Ether) else None
 
-    timestamp = float(pkt.time)
-    time_str = format_time(timestamp)
-
     if ip == "0.0.0.0":
         return
 
-    if ether_mac and ether_mac != arp_mac:
+    timestamp = float(pkt.time)
+    time_str = format_time(timestamp)
+
+    # A mismatched packet is suspect: report it, but never learn from it.
+    suspect = bool(ether_mac and ether_mac != arp_mac)
+
+    if suspect:
         if record(
             findings, "WARN", "header_mismatch", ip, timestamp, 
             evidence = (ether_mac, arp_mac)
@@ -63,9 +66,10 @@ def check_arp(pkt, table, findings):
             evidence = arp_mac
         )
 
-    known_macs.add(arp_mac)
+    if not suspect:
+        known_macs.add(arp_mac)
 
-if __name__ == "__main__":    
+def main():
     with PcapReader("sample.pcap") as pcap:
         table = defaultdict(set)
         findings = {}
@@ -88,3 +92,6 @@ if __name__ == "__main__":
         for e in sorted(item["evidence"]):
             print(f"  {e}")
         print("-" * 30)
+
+if __name__ == "__main__":    
+    main()
