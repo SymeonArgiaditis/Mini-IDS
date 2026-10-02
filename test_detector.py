@@ -43,7 +43,7 @@ def test_same_mac_sent_twice_for_one_ip():
     )
 
     assert len(findings) == 0
-    assert len(table[IP]) == {MAC_1}
+    assert table[IP] == {MAC_1}
 
 
 def test_third_mac_arriving_after_the_first_alert():
