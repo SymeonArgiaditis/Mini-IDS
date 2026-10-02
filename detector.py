@@ -11,12 +11,15 @@ def record(findings, level, kind, ip, ts, **details):
     if key in findings:
         findings[key]["count"] += 1
         findings[key]["last_seen"] = ts
+
+        return False
     else:
         findings[key] = {
             "level": level, "kind": kind, "ip":ip,
             "first_seen": ts, "last_seen": ts, "count": 1,
-            **details  
+            **details 
         }
+        return True
 
 def check_arp(pkt, table, findings):
     ip = pkt[ARP].psrc
@@ -33,14 +36,14 @@ def check_arp(pkt, table, findings):
         return
 
     if ether_mac and ether_mac != mac:
-        print(
-            f"[WARN] ARP header mismatch for {ip}\n"
-            f"\tEthernet src: {ether_mac} | ARP hwsrc: {mac} | t={time_str}\n"
-        )
-        record(
-            findings, "WARN", "header_mismatch", ip, timestamp,
-            ether_mac = ether_mac, arp_mac = mac  
-        )
+        if record(
+            findings, "WARN", "header_mismatch", ip, timestamp, 
+            ether_mac = ether_mac, arp_mac = mac
+        ):
+            print(
+                f"[WARN] ARP header mismatch for {ip}\n"
+                f"\tEthernet src: {ether_mac} | ARP hwsrc: {mac} | t={time_str}\n"
+            )
 
     known_macs = table[ip]
 
