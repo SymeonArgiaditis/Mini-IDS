@@ -36,6 +36,8 @@ def check_arp(pkt, table, findings):
     if ip == "0.0.0.0":
         return
 
+    table.setdefault(ip, set())
+
     timestamp = float(pkt.time)
     time_str = format_time(timestamp)
 
@@ -66,7 +68,7 @@ def check_arp(pkt, table, findings):
 
     # Only populate table when the packet is trusted
     if not suspect:
-        table.setdefault(ip, set()).add(arp_mac)
+        table.add(arp_mac)
 
 
 def main():
