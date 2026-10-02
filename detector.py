@@ -39,7 +39,7 @@ def check_arp(pkt, table, findings):
         )
         record(
             findings, "WARN", "header_mismatch", ip, timestamp,
-            ether_mac = ether_mac, arp_mac = mac    
+            ether_mac = ether_mac, arp_mac = mac  
         )
 
     known_macs = table[ip]
@@ -67,9 +67,9 @@ with PcapReader("sample.pcap") as pcap:
     print(f"ARP Table State: {dict(table)}")
 
 print("\n--- Summary ---")
-for level, kind, ip, first_seen, last_seen, count in findings.values():
-    print(f"IP: {ip}")
-    print(f"Kind: {kind}")
-    print(f"First seen: {first_seen} | Last seen: {last_seen}")
-    print(f"Appearances: {count}")
+for item in findings.values():
+    print(f"IP: {item["ip"]}")
+    print(f"Kind: {item["kind"]}")
+    print(f"First seen: {item["first_seen"]} | Last seen: {item["last_seen"]}")
+    print(f"Appearances: {item["count"]}")
     print("-" * 30)
