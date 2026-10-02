@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 
 def format_time(timestamp):
     utc_timestamp = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-    time_str = utc_timestamp.strftime("%H:%M:%S")
+    time_str = utc_timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
     return time_str
 
