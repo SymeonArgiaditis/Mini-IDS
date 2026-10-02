@@ -7,31 +7,29 @@ from datetime import datetime, timezone
 
 def format_time(timestamp):
     utc_timestamp = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-    time_str = utc_timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-    return time_str
+    return utc_timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-def record(findings, level, kind, ip, ts, **details):
+def record(findings, level, kind, ip, ts, evidence):
     key = (kind, ip)
 
     if key in findings:
         findings[key]["count"] += 1
         findings[key]["last_seen"] = ts
-
+        findings[key]["evidence"].add(evidence)
+        
         return False
     else:
         findings[key] = {
             "level": level, "kind": kind, "ip":ip,
             "first_seen": ts, "last_seen": ts, "count": 1,
-            **details 
+            "evidence": {evidence}
         }
         return True
 
 def check_arp(pkt, table, findings):
     ip = pkt[ARP].psrc
-    mac = pkt[ARP].hwsrc
-
-
+    arp_mac = pkt[ARP].hwsrc
     ether_mac = pkt[Ether].src if pkt.haslayer(Ether) else None
 
     timestamp = float(pkt.time)
@@ -40,29 +38,29 @@ def check_arp(pkt, table, findings):
     if ip == "0.0.0.0":
         return
 
-    if ether_mac and ether_mac != mac:
+    if ether_mac and ether_mac != arp_mac:
         if record(
             findings, "WARN", "header_mismatch", ip, timestamp, 
-            ether_mac = ether_mac, arp_mac = mac
+            evidence = (ether_mac, arp_mac)
         ):
             print(
                 f"[WARN] ARP header mismatch for {ip}\n"
-                f"\tEthernet src: {ether_mac} | ARP hwsrc: {mac} | t={time_str}\n"
+                f"\tEthernet src: {ether_mac} | ARP hwsrc: {arp_mac} | t={time_str}\n"
             )
 
     known_macs = table[ip]
 
-    if known_macs and mac not in known_macs:
+    if known_macs and arp_mac not in known_macs:
         print(
             f"[ALERT] Possible ARP spoofing for {ip}!\n"
-            f"\tOld MAC: {known_macs} | New MAC: {mac} | t={time_str}\n"
+            f"\tOld MAC: {known_macs} | New MAC: {arp_mac} | t={time_str}\n"
         )
         record(
             findings, "ALERT", "arp_spoofing", ip, timestamp,
-            ether_mac = ether_mac, arp_mac = mac
+            evidence = arp_mac
         )
 
-    known_macs.add(mac)
+    known_macs.add(arp_mac)
 
 with PcapReader("sample.pcap") as pcap:
     table = defaultdict(set)
@@ -82,4 +80,7 @@ for item in findings.values():
     print(f"First seen: {format_time(item['first_seen'])}")
     print(f"Last seen: {format_time(item['last_seen'])}")
     print(f"Appearances: {item['count']}")
+    print("Evidence:")
+    for e in sorted(item["evidence"]):
+        print(f"  {e}")
     print("-" * 30)
