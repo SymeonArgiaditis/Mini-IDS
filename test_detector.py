@@ -14,6 +14,7 @@ def make_arp(ip, arp_mac, ether_mac=None, ts=1700000000.0):
 IP = "192.168.1.50"
 MAC_1, MAC_2, MAC_3 = "aa:aa:aa:aa:aa:01", "aa:aa:aa:aa:aa:02", "aa:aa:aa:aa:aa:03"
 SPOOF_KEY = ("arp_spoofing", IP)
+MISMATCH_KEY = ("header_mismatch", IP)
 
 
 def run(*packets):
@@ -55,3 +56,15 @@ def test_third_mac_arriving_after_the_first_alert():
 
     assert findings[SPOOF_KEY]["count"] == 2
     assert findings[SPOOF_KEY]["evidence"] == {MAC_2, MAC_3}
+
+
+def test_header_mismatch_packet_for_new_ip():
+    # What keys are in findings, and what is table[IP]
+    table, findings = run(
+        make_arp(IP, MAC_1, ether_mac=MAC_3)
+    )
+
+    assert list(findings) == [MISMATCH_KEY]
+    assert findings[MISMATCH_KEY]["evidence"] == {(MAC_3, MAC_1)}
+    assert table[IP] == set()
+
