@@ -10,18 +10,24 @@ def make_arp(ip, arp_mac, ether_mac=None, ts=1700000000.0):
 
     return pkt
 
-def test_new_mac_for_known_ip_raises_one_alert():
+IP = "192.168.1.50"
+MAC_1, MAC_2, MAC_3 = "aa:aa:aa:aa:aa:01", "aa:aa:aa:aa:aa:02", "aa:aa:aa:aa:aa:03"
+SPOOF_KEY = ("arp_spoofing", IP)
+
+def run(*packets):
     table = defaultdict(set)
     findings = {}
 
-    check_arp(make_arp("192.168.1.50", "aa:aa:aa:aa:aa:01"), table, findings)
-    check_arp(make_arp("192.168.1.50", "aa:aa:aa:aa:aa:02"), table, findings)
+    for pkt in packets:
+        check_arp(pkt, table, findings)
 
-    assert len(findings) == 1
+    return table, findings
 
-    finding = findings[("arp_spoofing", "192.168.1.50")]
-    assert finding["count"] == 1
-    assert finding["evidence"] == {"aa:aa:aa:aa:aa:02"}
+def test_new_mac_for_known_ip_raises_one_alert():
+    table, findings = run(make_arp(IP, MAC_1), make_arp(IP, MAC_2))
+
+    assert list(findings) == [SPOOF_KEY]
+    assert findings[SPOOF_KEY]["evidence"] == {MAC_2}
 
 def test_same_mac_sent_twice_for_one_ip():
     table = defaultdict(set)
