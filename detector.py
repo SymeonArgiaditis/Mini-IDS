@@ -5,10 +5,12 @@ from scapy.layers.dns import DNS, DNSQR
 from collections import defaultdict
 from datetime import datetime, timezone
 
+
 def format_time(timestamp):
     utc_timestamp = datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
     return utc_timestamp.strftime("%Y-%m-%d %H:%M:%S")
+
 
 def record(findings, level, kind, ip, ts, evidence):
     key = (kind, ip)
@@ -26,6 +28,7 @@ def record(findings, level, kind, ip, ts, evidence):
             "evidence": {evidence}
         }
         return True
+
 
 def check_arp(pkt, table, findings):
     ip = pkt[ARP].psrc
@@ -62,25 +65,26 @@ def check_arp(pkt, table, findings):
 
     known_macs.add(arp_mac)
 
-with PcapReader("sample.pcap") as pcap:
-    table = defaultdict(set)
-    findings = {}
+if __name__ == "__main__":    
+    with PcapReader("sample.pcap") as pcap:
+        table = defaultdict(set)
+        findings = {}
 
-    for pkt in pcap:
-        if pkt.haslayer(ARP):
-            check_arp(pkt, table, findings)
+        for pkt in pcap:
+            if pkt.haslayer(ARP):
+                check_arp(pkt, table, findings)
 
     print(f"ARP Table State: {dict(table)}")
 
-print("\n--- Summary ---")
-for item in findings.values():
-    print(f"IP: {item['ip']}")
-    print(f"Level: {item['level']}")
-    print(f"Kind: {item['kind']}")
-    print(f"First seen: {format_time(item['first_seen'])}")
-    print(f"Last seen: {format_time(item['last_seen'])}")
-    print(f"Appearances: {item['count']}")
-    print("Evidence:")
-    for e in sorted(item["evidence"]):
-        print(f"  {e}")
-    print("-" * 30)
+    print("\n--- Summary ---")
+    for item in findings.values():
+        print(f"IP: {item['ip']}")
+        print(f"Level: {item['level']}")
+        print(f"Kind: {item['kind']}")
+        print(f"First seen: {format_time(item['first_seen'])}")
+        print(f"Last seen: {format_time(item['last_seen'])}")
+        print(f"Appearances: {item['count']}")
+        print("Evidence:")
+        for e in sorted(item["evidence"]):
+            print(f"  {e}")
+        print("-" * 30)
