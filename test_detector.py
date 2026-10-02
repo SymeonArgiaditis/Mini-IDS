@@ -1,4 +1,3 @@
-from collections import defaultdict
 from scapy.layers.l2 import Ether, ARP
 
 from detector import check_arp
@@ -17,7 +16,7 @@ SPOOF_KEY = ("arp_spoofing", IP)
 
 
 def run(*packets):
-    table = defaultdict(set)
+    table = {}
     findings = {}
 
     for pkt in packets:

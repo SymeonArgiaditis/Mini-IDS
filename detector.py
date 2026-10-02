@@ -1,8 +1,6 @@
 from scapy.all import PcapReader
 from scapy.layers.l2 import ARP, Ether
-from scapy.layers.dns import DNS, DNSQR
 
-from collections import defaultdict
 from datetime import datetime, timezone
 
 
@@ -53,8 +51,8 @@ def check_arp(pkt, table, findings):
                 f"[WARN] ARP header mismatch for {ip}\n"
                 f"\tEthernet src: {ether_mac} | ARP hwsrc: {arp_mac} | t={time_str}\n"
             )
-
-    known_macs = table[ip]
+    # Safely query the dict without populating key if missing
+    known_macs = table.get(ip)
 
     if known_macs and arp_mac not in known_macs:
         print(
@@ -66,12 +64,13 @@ def check_arp(pkt, table, findings):
             evidence = arp_mac
         )
 
+    # Only populate table when the packet is trusted
     if not suspect:
-        known_macs.add(arp_mac)
+        table.setdefault(ip, set()).add(arp_mac)
 
 def main():
     with PcapReader("sample.pcap") as pcap:
-        table = defaultdict(set)
+        table = {}
         findings = {}
 
         for pkt in pcap:
