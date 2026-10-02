@@ -36,8 +36,6 @@ def check_arp(pkt, table, findings):
     if ip == "0.0.0.0":
         return
 
-    table.setdefault(ip, set())
-
     timestamp = float(pkt.time)
     time_str = format_time(timestamp)
 
