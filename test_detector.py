@@ -58,12 +58,11 @@ def test_third_mac_arriving_after_the_first_alert():
 
 
 def test_header_mismatch_packet_for_new_ip():
-    # What keys are in findings, and what is table[IP]
     table, findings = run(
         make_arp(IP, MAC_1, ether_mac=MAC_3)
     )
 
     assert list(findings) == [MISMATCH_KEY]
     assert findings[MISMATCH_KEY]["evidence"] == {(MAC_3, MAC_1)}
-    assert table[IP] == set()
+    assert IP not in table
 

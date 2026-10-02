@@ -53,8 +53,8 @@ def check_arp(pkt, table, findings):
                 f"[WARN] ARP header mismatch for {ip}\n"
                 f"\tEthernet src: {ether_mac} | ARP hwsrc: {arp_mac} | t={time_str}\n"
             )
-    # Safely query the dict without populating key if missing
-    known_macs = table.get(ip)
+    # Read-only lookup: does not create the key if the IP is new
+    known_macs = table.get(ip, set())
 
     if known_macs and arp_mac not in known_macs:
         print(
@@ -66,9 +66,9 @@ def check_arp(pkt, table, findings):
             evidence = arp_mac
         )
 
-    # Only populate table when the packet is trusted
+    # Only learn from trusted packets. Create key
     if not suspect:
-        table.add(arp_mac)
+        table.setdefault(ip, set()).add(arp_mac)
 
 
 def main():
