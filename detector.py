@@ -72,6 +72,7 @@ with PcapReader("sample.pcap") as pcap:
 print("\n--- Summary ---")
 for item in findings.values():
     print(f"IP: {item['ip']}")
+    print(f"Level: {item['level']}")
     print(f"Kind: {item['kind']}")
     print(f"First seen: {item['first_seen']} | Last seen: {item['last_seen']}")
     print(f"Appearances: {item['count']}")
