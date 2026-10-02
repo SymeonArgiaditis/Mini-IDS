@@ -36,13 +36,11 @@ def test_same_mac_sent_twice_for_one_ip():
     assert len(table[IP]) == 1
 
 def test_third_mac_arriving_after_the_first_alert():
-    table = defaultdict(set)
-    findings = {}
+    table, findings = run(
+        make_arp(IP, MAC_1),
+        make_arp(IP, MAC_2),
+        make_arp(IP, MAC_3)
+    )
 
-    check_arp(make_arp("192.168.1.50", "aa:aa:aa:aa:aa:01"), table, findings)
-    check_arp(make_arp("192.168.1.50", "aa:aa:aa:aa:aa:02"), table, findings)
-    check_arp(make_arp("192.168.1.50", "aa:aa:aa:aa:aa:03"), table, findings)
-
-    assert findings[("arp_spoofing", "192.168.1.50")]["count"] == 2
-    assert findings[("arp_spoofing", "192.168.1.50")]["evidence"] == {
-        "aa:aa:aa:aa:aa:02", "aa:aa:aa:aa:aa:03"}
+    assert findings[SPOOF_KEY]["count"] == 2
+    assert findings[SPOOF_KEY]["evidence"] == {MAC_2, MAC_3}
