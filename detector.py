@@ -1,16 +1,10 @@
 from scapy.all import PcapReader
 from scapy.layers.l2 import ARP, Ether
 
-from datetime import datetime, timezone
-
 from parsing import parse_arp
 from arp import is_suspect, detect_arp, learn
 from findings import record
-
-def format_time(timestamp):
-    utc_timestamp = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-
-    return utc_timestamp.strftime("%Y-%m-%d %H:%M:%S")
+from report import format_time
 
 
 def print_detection(d):
