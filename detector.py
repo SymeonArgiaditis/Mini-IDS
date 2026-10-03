@@ -129,7 +129,6 @@ def main():
     table, findings = {}, {}
 
     with PcapReader("sample.pcap") as pcap:
-
         for pkt in pcap:
             if pkt.haslayer(ARP):
                 for d in process(pkt, table, findings):
