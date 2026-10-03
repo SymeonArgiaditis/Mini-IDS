@@ -66,3 +66,15 @@ def test_header_mismatch_packet_for_new_ip():
     assert findings[MISMATCH_KEY]["evidence"] == {(MAC_3, MAC_1)}
     assert IP not in table
 
+def test_repeated_suspect_packet_that_also_conflicts():
+    suspect = make_arp(IP, MAC_2, ether_mac=MAC_3)
+
+    table, findings = run(
+        make_arp(IP, MAC_1), suspect, suspect, suspect
+    )
+
+    assert set(findings) == {SPOOF_KEY, MISMATCH_KEY}
+    assert findings[MISMATCH_KEY]["count"] == 3
+    assert findings[SPOOF_KEY]["count"] == 3
+    # Suspect MAC addresses are not saved (learned from)
+    assert table[IP] == {MAC_1}
