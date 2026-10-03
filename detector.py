@@ -4,10 +4,7 @@ from scapy.layers.l2 import ARP, Ether
 from datetime import datetime, timezone
 
 from parsing import parse_arp
-
-
-def is_suspect(ether_mac, arp_mac):
-    return bool(ether_mac and ether_mac != arp_mac)
+from arp import is_suspect
 
 
 def detect_arp(obs, table):
