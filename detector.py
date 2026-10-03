@@ -43,6 +43,20 @@ def record(findings, level, kind, ip, ts, evidence):
         }
         return True
 
+def print_summary(findings):
+    print("\n--- Summary ---")
+    for item in findings.values():
+        print(f"IP: {item['ip']}")
+        print(f"Level: {item['level']}")
+        print(f"Kind: {item['kind']}")
+        print(f"First seen: {format_time(item['first_seen'])}")
+        print(f"Last seen: {format_time(item['last_seen'])}")
+        print(f"Appearances: {item['count']}")
+        print("Evidence:")
+        for e in sorted(item["evidence"]):
+            print(f"  {e}")
+        print("-" * 30)
+
 
 def check_arp(pkt, table, findings):
     ip, arp_mac, ether_mac, timestamp = parse_arp(pkt)
@@ -94,18 +108,7 @@ def main():
 
     print(f"ARP Table State: {dict(table)}")
 
-    print("\n--- Summary ---")
-    for item in findings.values():
-        print(f"IP: {item['ip']}")
-        print(f"Level: {item['level']}")
-        print(f"Kind: {item['kind']}")
-        print(f"First seen: {format_time(item['first_seen'])}")
-        print(f"Last seen: {format_time(item['last_seen'])}")
-        print(f"Appearances: {item['count']}")
-        print("Evidence:")
-        for e in sorted(item["evidence"]):
-            print(f"  {e}")
-        print("-" * 30)
+    print_summary(findings)
 
 
 if __name__ == "__main__":    
