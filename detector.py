@@ -22,6 +22,10 @@ def format_time(timestamp):
     return utc_timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
 
+def learn(table, ip, arp_mac):
+    table.setdefault(ip, set()).add(arp_mac)
+
+
 def record(findings, level, kind, ip, ts, evidence):
     key = (kind, ip)
 
@@ -73,9 +77,10 @@ def check_arp(pkt, table, findings):
                 f"\tOld MAC: {known_macs} | New MAC: {arp_mac} | t={time_str}\n"
             )
 
-    # Only learn from trusted packets. Create key
+    # Only learn from trusted packets
     if not suspect:
-        table.setdefault(ip, set()).add(arp_mac)
+        # Create key. Write to table
+        learn(table, ip, arp_mac)
 
 
 def main():
