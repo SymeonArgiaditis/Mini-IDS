@@ -7,8 +7,9 @@ def parse_arp(pkt):
     ip = pkt[ARP].psrc
     arp_mac = pkt[ARP].hwsrc
     ether_mac = pkt[Ether].src if pkt.haslayer(Ether) else None
+    timestamp = float(pkt.time)
 
-    return ip, arp_mac, ether_mac
+    return ip, arp_mac, ether_mac, timestamp
 
 
 def is_suspect(ether_mac, arp_mac):
@@ -40,12 +41,11 @@ def record(findings, level, kind, ip, ts, evidence):
 
 
 def check_arp(pkt, table, findings):
-    ip, arp_mac, ether_mac = parse_arp(pkt)
+    ip, arp_mac, ether_mac, timestamp = parse_arp(pkt)
 
     if ip == "0.0.0.0":
         return
 
-    timestamp = float(pkt.time)
     time_str = format_time(timestamp)
 
     # A mismatched packet is suspect: report it, but never learn from it.
