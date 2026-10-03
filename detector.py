@@ -5,31 +5,12 @@ from datetime import datetime, timezone
 
 from parsing import parse_arp
 from arp import is_suspect, detect_arp, learn
-
+from findings import record
 
 def format_time(timestamp):
     utc_timestamp = datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
     return utc_timestamp.strftime("%Y-%m-%d %H:%M:%S")
-
-
-def record(findings, d):
-    key = (d["kind"], d["ip"])
-
-    if key in findings:
-        findings[key]["count"] += 1
-        findings[key]["last_seen"] = d["ts"]
-        findings[key]["evidence"].add(d["evidence"])
-        
-        return False
-
-    findings[key] = {
-        "level": d["level"], "kind": d["kind"], "ip":d["ip"],
-        "first_seen": d["ts"], "last_seen": d["ts"], "count": 1,
-        "evidence": {d["evidence"]}
-    }
-    
-    return True
 
 
 def print_detection(d):
