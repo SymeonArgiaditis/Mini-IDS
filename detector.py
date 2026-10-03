@@ -55,14 +55,14 @@ def check_arp(pkt, table, findings):
     known_macs = table.get(ip, set())
 
     if known_macs and arp_mac not in known_macs:
-        print(
-            f"[ALERT] Possible ARP spoofing for {ip}!\n"
-            f"\tOld MAC: {known_macs} | New MAC: {arp_mac} | t={time_str}\n"
-        )
-        record(
+        if record(
             findings, "ALERT", "arp_spoofing", ip, timestamp,
             evidence = arp_mac
-        )
+        ):
+            print(
+                f"[ALERT] Possible ARP spoofing for {ip}!\n"
+                f"\tOld MAC: {known_macs} | New MAC: {arp_mac} | t={time_str}\n"
+            )
 
     # Only learn from trusted packets. Create key
     if not suspect:
