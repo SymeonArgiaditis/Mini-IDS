@@ -3,7 +3,7 @@ from scapy.layers.l2 import ARP, Ether
 
 from datetime import datetime, timezone
 
-def parse_packet(pkt):
+def parse_arp(pkt):
     ip = pkt[ARP].psrc
     arp_mac = pkt[ARP].hwsrc
     ether_mac = pkt[Ether].src if pkt.haslayer(Ether) else None
@@ -40,7 +40,7 @@ def record(findings, level, kind, ip, ts, evidence):
 
 
 def check_arp(pkt, table, findings):
-    ip, arp_mac, ether_mac = parse_packet(pkt)
+    ip, arp_mac, ether_mac = parse_arp(pkt)
 
     if ip == "0.0.0.0":
         return
