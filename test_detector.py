@@ -17,8 +17,7 @@ MISMATCH_KEY = ("header_mismatch", IP)
 
 
 def run(*packets):
-    table = {}
-    findings = {}
+    table, findings = {}
 
     for pkt in packets:
         process(pkt, table, findings)
