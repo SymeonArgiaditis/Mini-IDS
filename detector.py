@@ -63,7 +63,7 @@ def print_summary(findings):
         print("-" * 30)
 
 
-def check_arp(pkt, table, findings):
+def process(pkt, table, findings):
     ip, arp_mac, ether_mac, timestamp = parse_arp(pkt)
 
     if ip == "0.0.0.0":
@@ -104,12 +104,12 @@ def check_arp(pkt, table, findings):
 
 def main():
     table, findings = {}
-    
+
     with PcapReader("sample.pcap") as pcap:
 
         for pkt in pcap:
             if pkt.haslayer(ARP):
-                check_arp(pkt, table, findings)
+                process(pkt, table, findings)
 
     print_table(table)
     print_summary(findings)

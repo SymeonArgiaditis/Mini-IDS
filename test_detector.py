@@ -1,6 +1,6 @@
 from scapy.layers.l2 import Ether, ARP
 
-from detector import check_arp
+from detector import process
 
 
 def make_arp(ip, arp_mac, ether_mac=None, ts=1700000000.0):
@@ -21,7 +21,7 @@ def run(*packets):
     findings = {}
 
     for pkt in packets:
-        check_arp(pkt, table, findings)
+        process(pkt, table, findings)
 
     return table, findings
 
