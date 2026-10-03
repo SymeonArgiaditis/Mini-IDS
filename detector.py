@@ -69,6 +69,23 @@ def record(findings, d):
     return True
 
 
+def print_detection(d):
+    t = format_time(d["ts"])
+
+    if d["kind"] == "header_mismatch":
+        ether_mac, arp_mac = d["evidence"]
+
+        print(
+            f"[WARN] ARP header mismatch for {d['ip']}\n"
+            f"\tEthernet src: {ether_mac} | ARP hwsrc: {arp_mac} | t={t}\n" 
+        )
+    elif d["kind"] == "arp_spoofing":
+        print(
+            f"[ALERT] Possible ARP spoofing for {d['ip']}!\n"
+            f"\tOld MAC: {set(d['known_macs'])} | New MAC: {d['evidence']} | t={t}\n"
+        )
+
+
 def print_table(table):
       print(f"ARP Table State: {dict(table)}")
 
@@ -93,10 +110,7 @@ def process(pkt, table, findings):
     ip, arp_mac, ether_mac, _ = obs
 
     if ip == "0.0.0.0":
-        return
-
-    # A mismatched packet is suspect: report it, but never learn from it.
-    suspect = is_suspect(ether_mac, arp_mac)
+        return []
 
     new = []
     for d in detect_arp(obs, table):
@@ -118,8 +132,9 @@ def main():
 
         for pkt in pcap:
             if pkt.haslayer(ARP):
-                process(pkt, table, findings)
-
+                for d in process(pkt, table, findings):
+                    print_detection(d)
+                
     print_table(table)
     print_summary(findings)
 
