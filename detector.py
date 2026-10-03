@@ -12,7 +12,7 @@ def parse_packet(pkt):
 
 
 def suspect(ether_mac, arp_mac):
-    return ether_mac and ether_mac != arp_mac
+    return bool(ether_mac and ether_mac != arp_mac)
 
 
 def format_time(timestamp):
