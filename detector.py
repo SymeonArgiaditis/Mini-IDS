@@ -3,13 +3,7 @@ from scapy.layers.l2 import ARP, Ether
 
 from datetime import datetime, timezone
 
-def parse_arp(pkt):
-    ip = pkt[ARP].psrc
-    arp_mac = pkt[ARP].hwsrc
-    ether_mac = pkt[Ether].src if pkt.haslayer(Ether) else None
-    timestamp = float(pkt.time)
-
-    return ip, arp_mac, ether_mac, timestamp
+from parsing import parse_arp
 
 
 def is_suspect(ether_mac, arp_mac):
