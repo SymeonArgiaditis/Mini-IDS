@@ -87,7 +87,7 @@ def print_detection(d):
 
 
 def print_table(table):
-      print(f"ARP Table State: {dict(table)}")
+    print(f"ARP Table State: {dict(table)}")
 
 
 def print_summary(findings):
