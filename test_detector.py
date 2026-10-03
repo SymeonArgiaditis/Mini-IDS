@@ -1,6 +1,6 @@
 from scapy.layers.l2 import Ether, ARP
 
-from detector import check_arp
+from detector import process
 
 
 def make_arp(ip, arp_mac, ether_mac=None, ts=1700000000.0):
@@ -17,11 +17,10 @@ MISMATCH_KEY = ("header_mismatch", IP)
 
 
 def run(*packets):
-    table = {}
-    findings = {}
+    table, findings = {}, {}
 
     for pkt in packets:
-        check_arp(pkt, table, findings)
+        process(pkt, table, findings)
 
     return table, findings
 
