@@ -126,7 +126,7 @@ def process(pkt, table, findings):
 
 
 def main():
-    table, findings = {}
+    table, findings = {}, {}
 
     with PcapReader("sample.pcap") as pcap:
 
