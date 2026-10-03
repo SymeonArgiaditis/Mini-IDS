@@ -11,7 +11,7 @@ def parse_packet(pkt):
     return ip, arp_mac, ether_mac
 
 
-def suspect(ether_mac, arp_mac):
+def is_suspect(ether_mac, arp_mac):
     return bool(ether_mac and ether_mac != arp_mac)
 
 
@@ -49,7 +49,9 @@ def check_arp(pkt, table, findings):
     time_str = format_time(timestamp)
 
     # A mismatched packet is suspect: report it, but never learn from it.
-    if suspect(ether_mac, arp_mac):
+    suspect = is_suspect(ether_mac, arp_mac)
+
+    if suspect:
         if record(
             findings, "WARN", "header_mismatch", ip, timestamp, 
             evidence = (ether_mac, arp_mac)
@@ -72,7 +74,7 @@ def check_arp(pkt, table, findings):
             )
 
     # Only learn from trusted packets. Create key
-    if not suspect(ether_mac, arp_mac):
+    if not suspect:
         table.setdefault(ip, set()).add(arp_mac)
 
 
