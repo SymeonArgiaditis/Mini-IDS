@@ -112,7 +112,7 @@ This is a learning project, and it is honest about what it can't do:
 ## Roadmap
 
 - [x] First-occurrence gating for `ALERT` output (matching the `WARN` behavior)
-- [ ] Return findings from detection functions instead of printing, separating detection from reporting
+- [x] Return findings from detection functions instead of printing, separating detection from reporting
 - [ ] New-device detection ("first time this IP/MAC pair appeared")
 - [ ] MAC flip-flop detection (an IP alternating between MACs)
 - [ ] DNS parsing, stored in SQLite
