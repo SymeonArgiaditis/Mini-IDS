@@ -16,6 +16,30 @@ def is_suspect(ether_mac, arp_mac):
     return bool(ether_mac and ether_mac != arp_mac)
 
 
+def detect_arp(obs, table):
+    ip, arp_mac, ether_mac, ts = obs
+    detections = []
+
+    if is_suspect(ether_mac, arp_mac):
+        detections.append({
+            "level": "WARN", "kind": "header_mismatch",
+            "ip": ip, "ts": ts,
+            "evidence": (ether_mac, arp_mac),
+        })
+
+    known_macs = table.get(ip, set())
+
+    if known_macs and arp_mac not in known_macs:
+        detections.append({
+            "level": "ALERT", "kind": "arp_spoofing",
+            "ip": ip, "ts": ts,
+            "evidence": arp_mac,
+            "known_macs": frozenset(known_macs),
+        })
+
+    return detections
+
+
 def format_time(timestamp):
     utc_timestamp = datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
@@ -26,22 +50,23 @@ def learn(table, ip, arp_mac):
     table.setdefault(ip, set()).add(arp_mac)
 
 
-def record(findings, level, kind, ip, ts, evidence):
-    key = (kind, ip)
+def record(findings, d):
+    key = (d["kind"], d["ip"])
 
     if key in findings:
         findings[key]["count"] += 1
-        findings[key]["last_seen"] = ts
-        findings[key]["evidence"].add(evidence)
+        findings[key]["last_seen"] = d["ts"]
+        findings[key]["evidence"].add(d["evidence"])
         
         return False
-    else:
-        findings[key] = {
-            "level": level, "kind": kind, "ip":ip,
-            "first_seen": ts, "last_seen": ts, "count": 1,
-            "evidence": {evidence}
-        }
-        return True
+
+    findings[key] = {
+        "level": d["level"], "kind": d["kind"], "ip":d["ip"],
+        "first_seen": d["ts"], "last_seen": d["ts"], "count": 1,
+        "evidence": {d["evidence"]}
+    }
+    
+    return True
 
 
 def print_table(table):
@@ -64,42 +89,26 @@ def print_summary(findings):
 
 
 def process(pkt, table, findings):
-    ip, arp_mac, ether_mac, timestamp = parse_arp(pkt)
+    obs = parse_arp(pkt)
+    ip, arp_mac, ether_mac, _ = obs
 
     if ip == "0.0.0.0":
         return
 
-    time_str = format_time(timestamp)
-
     # A mismatched packet is suspect: report it, but never learn from it.
     suspect = is_suspect(ether_mac, arp_mac)
 
-    if suspect:
-        if record(
-            findings, "WARN", "header_mismatch", ip, timestamp, 
-            evidence = (ether_mac, arp_mac)
-        ):
-            print(
-                f"[WARN] ARP header mismatch for {ip}\n"
-                f"\tEthernet src: {ether_mac} | ARP hwsrc: {arp_mac} | t={time_str}\n"
-            )
-    # Read-only lookup: does not create the key if the IP is new
-    known_macs = table.get(ip, set())
-
-    if known_macs and arp_mac not in known_macs:
-        if record(
-            findings, "ALERT", "arp_spoofing", ip, timestamp,
-            evidence = arp_mac
-        ):
-            print(
-                f"[ALERT] Possible ARP spoofing for {ip}!\n"
-                f"\tOld MAC: {known_macs} | New MAC: {arp_mac} | t={time_str}\n"
-            )
+    new = []
+    for d in detect_arp(obs, table):
+        if record(findings, d):
+            new.append(d)
 
     # Only learn from trusted packets
-    if not suspect:
+    if not is_suspect(ether_mac, arp_mac):
         # Create key. Write to table
         learn(table, ip, arp_mac)
+
+    return new
 
 
 def main():
