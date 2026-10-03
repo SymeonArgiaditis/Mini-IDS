@@ -1,6 +1,6 @@
 from scapy.layers.l2 import Ether, ARP
 
-from detector import process
+from mini_ids.detector import process
 
 
 def make_arp(ip, arp_mac, ether_mac=None, ts=1700000000.0):
