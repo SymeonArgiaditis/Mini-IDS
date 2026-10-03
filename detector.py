@@ -43,6 +43,11 @@ def record(findings, level, kind, ip, ts, evidence):
         }
         return True
 
+
+def print_table(table):
+      print(f"ARP Table State: {dict(table)}")
+
+
 def print_summary(findings):
     print("\n--- Summary ---")
     for item in findings.values():
@@ -106,8 +111,7 @@ def main():
             if pkt.haslayer(ARP):
                 check_arp(pkt, table, findings)
 
-    print(f"ARP Table State: {dict(table)}")
-
+    print_table(table)
     print_summary(findings)
 
 
