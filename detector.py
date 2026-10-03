@@ -103,9 +103,9 @@ def check_arp(pkt, table, findings):
 
 
 def main():
+    table, findings = {}
+    
     with PcapReader("sample.pcap") as pcap:
-        table = {}
-        findings = {}
 
         for pkt in pcap:
             if pkt.haslayer(ARP):
