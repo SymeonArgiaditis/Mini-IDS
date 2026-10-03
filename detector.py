@@ -4,24 +4,7 @@ from scapy.layers.l2 import ARP, Ether
 from parsing import parse_arp
 from arp import is_suspect, detect_arp, learn
 from findings import record
-from report import format_time
-
-
-def print_detection(d):
-    t = format_time(d["ts"])
-
-    if d["kind"] == "header_mismatch":
-        ether_mac, arp_mac = d["evidence"]
-
-        print(
-            f"[WARN] ARP header mismatch for {d['ip']}\n"
-            f"\tEthernet src: {ether_mac} | ARP hwsrc: {arp_mac} | t={t}\n" 
-        )
-    elif d["kind"] == "arp_spoofing":
-        print(
-            f"[ALERT] Possible ARP spoofing for {d['ip']}!\n"
-            f"\tOld MAC: {set(d['known_macs'])} | New MAC: {d['evidence']} | t={t}\n"
-        )
+from report import format_time, print_detection
 
 
 def print_table(table):
