@@ -4,17 +4,13 @@ from scapy.layers.l2 import ARP, Ether
 from datetime import datetime, timezone
 
 from parsing import parse_arp
-from arp import is_suspect, detect_arp
+from arp import is_suspect, detect_arp, learn
 
 
 def format_time(timestamp):
     utc_timestamp = datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
     return utc_timestamp.strftime("%Y-%m-%d %H:%M:%S")
-
-
-def learn(table, ip, arp_mac):
-    table.setdefault(ip, set()).add(arp_mac)
 
 
 def record(findings, d):

@@ -24,3 +24,7 @@ def detect_arp(obs, table):
         })
 
     return detections
+
+
+def learn(table, ip, arp_mac):
+    table.setdefault(ip, set()).add(arp_mac)
