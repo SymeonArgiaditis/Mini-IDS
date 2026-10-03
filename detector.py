@@ -4,26 +4,7 @@ from scapy.layers.l2 import ARP, Ether
 from parsing import parse_arp
 from arp import is_suspect, detect_arp, learn
 from findings import record
-from report import format_time, print_detection
-
-
-def print_table(table):
-    print(f"ARP Table State: {dict(table)}")
-
-
-def print_summary(findings):
-    print("\n--- Summary ---")
-    for item in findings.values():
-        print(f"IP: {item['ip']}")
-        print(f"Level: {item['level']}")
-        print(f"Kind: {item['kind']}")
-        print(f"First seen: {format_time(item['first_seen'])}")
-        print(f"Last seen: {format_time(item['last_seen'])}")
-        print(f"Appearances: {item['count']}")
-        print("Evidence:")
-        for e in sorted(item["evidence"]):
-            print(f"  {e}")
-        print("-" * 30)
+from report import print_detection, print_summary, print_table
 
 
 def process(pkt, table, findings):

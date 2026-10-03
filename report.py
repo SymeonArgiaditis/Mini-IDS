@@ -22,3 +22,22 @@ def print_detection(d):
             f"[ALERT] Possible ARP spoofing for {d['ip']}!\n"
             f"\tOld MAC: {set(d['known_macs'])} | New MAC: {d['evidence']} | t={t}\n"
         )
+
+
+def print_summary(findings):
+    print("\n--- Summary ---")
+    for item in findings.values():
+        print(f"IP: {item['ip']}")
+        print(f"Level: {item['level']}")
+        print(f"Kind: {item['kind']}")
+        print(f"First seen: {format_time(item['first_seen'])}")
+        print(f"Last seen: {format_time(item['last_seen'])}")
+        print(f"Appearances: {item['count']}")
+        print("Evidence:")
+        for e in sorted(item["evidence"]):
+            print(f"  {e}")
+        print("-" * 30)
+
+
+def print_table(table):
+    print(f"ARP Table State: {dict(table)}")
