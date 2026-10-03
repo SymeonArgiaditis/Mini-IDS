@@ -1,10 +1,10 @@
 from scapy.all import PcapReader
 from scapy.layers.l2 import ARP, Ether
 
-from parsing import parse_arp
-from arp import is_suspect, detect_arp, learn
-from findings import record
-from report import print_detection, print_summary, print_table
+from mini_ids.parsing import parse_arp
+from mini_ids.arp import is_suspect, detect_arp, learn
+from mini_ids.findings import record
+from mini_ids.report import print_detection, print_summary, print_table
 
 
 def process(pkt, table, findings):
